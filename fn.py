@@ -1,7 +1,7 @@
 from math import cos, sin, sqrt, acos, tan, atan
 import var
 import numpy as np
-import scipy as sp
+import matplotlib.pyplot as plt
 
 def WP4_2_wingbox_shape(y):
     theta = 0.0497367 # in radians
@@ -216,37 +216,32 @@ def WP4_2_Ixx(y):
 
     return Ixx
 
-def WP4_2_Izz(y):
-    list1=WP4_2_wingbox_shape(y)  
-    Izz=0
+#Create a y_list with step size 0.1
+y_list = np.zeros(224)
+for i in range(len(y_list)):
+    y_list[i] = i/10
 
-    #Calculating cross-sectional properties
-    fs=list1[4][1]-list1[1][1] #height of front spar
-    rs=list1[3][1]-list1[2][1] #height of rear spar
-    L_top=sqrt((list1[4][0]-list1[3][0])**2+(list1[4][1]-list1[3][1])**2)
-    L_bottom=sqrt((list1[2][0]-list1[1][0])**2+(list1[2][1]-list1[1][1])**2)
-    h_trapezoid=list1[2][0]-list1[1][0]
-    theta_top=acos(h_trapezoid/L_top)
-    theta_bottom=acos(h_trapezoid/L_bottom)
+Ixx_list = np.zeros(224)
+for i in range(len(Ixx_list)):
+    Ixx_list[i] = WP4_2_Ixx(i/10)
 
-    #Calculating Ixx for the front spar and rear spar
-    Izz+=fs*var.t_spar*(list1[4][0]-list1[0][0])**2 #Effect on the front spar
-    Izz+=rs*var.t_spar*(list1[3][0]-list1[0][0])**2 #Effect on the rear spar
+GJ_list = np.zeros(224)
+for i in range(len(GJ_list)):
+    GJ_list[i] = WP4_2_Torsional_Stiffness(i/10)
 
-    #Calculating Ixx for the top and bottom segments
-    Izz+=var.t_skin*L_top**3*cos(theta_top)**2/12+var.t_skin*L_top*((list1[4][0]+list1[3][0])/2-list1[0][0])**2 #Top segment
-    Izz+=var.t_skin*L_bottom**3*cos(theta_bottom)**2/12+var.t_skin*L_bottom*((list1[2][0]+list1[1][0])/2-list1[0][0])**2 #Bottom segment
+plt.figure(figsize=(13, 5))
+plt.subplots_adjust(wspace=0.5)
 
-    #Calculate the effect of the stringers
-    #Calculate the effect of the stringers
-    lower_difference=abs(list1[2][0]-list1[1][0])/(var.n_string_lower-1)
-    for i in range(var.n_string_lower):
-       x_lower=list1[1][0]+lower_difference*i #Add because it is going right
-       Izz+=var.A_stringer*(list1[0][0]-x_lower)**2
-    
-    upper_difference=abs(list1[4][0]-list1[3][0])/(var.n_string_upper-1)
-    for i in range(var.n_string_upper):
-        x_upper=list1[4][0]+upper_difference*i #Add because it is going right
-        Izz+=var.A_stringer*(list1[0][0]-x_upper)**2
+plt.subplot(121)
+plt.plot(y_list, Ixx_list)
+plt.title("Moment of Inertia")
+plt.xlabel("Span-Wise location [m]")
+plt.ylabel("Ixx [m^4]")
 
-    return Izz
+plt.subplot(122)
+plt.plot(y_list, GJ_list)
+plt.title("Torsional Stiffness")
+plt.xlabel("Span-Wise location [m]")
+plt.ylabel("GJ [Nm^2]")
+
+plt.show()

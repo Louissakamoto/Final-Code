@@ -120,7 +120,7 @@ for case in load_cases:
         plt.ylabel("Torsion T(y) [Nm]")
 
     count += 1
-    print("Im looping :) ", count,"/, please wait")
+    print("Im looping :) ", count,"out of 18, please wait")
 
 
 plt.subplot(231)
@@ -130,14 +130,13 @@ plt.gca().invert_yaxis()
 
 plt.show()
 
-print(maxS, maxM, maxT, countS, countM, countT)
 
 #positive loading
-V_easp, altp, npos, fuelp, payloadp = load_cases[15]
+V_easp, altp, npos, fuelp, payloadp = load_cases[countS[0]]
 x, Sp, Mdummy, Tdummy = LD.internalcalculator(V_easp, altp, npos, fuelp, payloadp)
-V_easp, altp, npos, fuelp, payloadp = load_cases[15]
+V_easp, altp, npos, fuelp, payloadp = load_cases[countM[0]]
 x, Sdummy, Mp, Tdummy = LD.internalcalculator(V_easp, altp, npos, fuelp, payloadp)
-V_easp, altp, npos, fuelp, payloadp = load_cases[2]
+V_easp, altp, npos, fuelp, payloadp = load_cases[countT[0]]
 x, Sdummy, Mdummy, Tp = LD.internalcalculator(V_easp, altp, npos, fuelp, payloadp)
 
 Spf = sp.interpolate.interp1d(x, Sp, kind="cubic", fill_value='extrapolate')
@@ -145,11 +144,11 @@ Mpf = sp.interpolate.interp1d(x, Mp, kind="cubic", fill_value='extrapolate')
 Tpf = sp.interpolate.interp1d(x, Tp, kind="cubic", fill_value='extrapolate')
 
 #negative loading
-V_easp, altp, npos, fuelp, payloadp = load_cases[1]
+V_easp, altp, npos, fuelp, payloadp = load_cases[countS[1]]
 x, Sn, Mdummy, Tdummy = LD.internalcalculator(V_easp, altp, npos, fuelp, payloadp)
-V_easp, altp, npos, fuelp, payloadp = load_cases[1]
+V_easp, altp, npos, fuelp, payloadp = load_cases[countS[1]]
 x, Sdummy, Mn, Tdummy = LD.internalcalculator(V_easp, altp, npos, fuelp, payloadp)
-V_easp, altp, npos, fuelp, payloadp = load_cases[1]
+V_easp, altp, npos, fuelp, payloadp = load_cases[countT[1]]
 x, Sdummy, Mdummy, Tn = LD.internalcalculator(V_easp, altp, npos, fuelp, payloadp)
 
 Snf = sp.interpolate.interp1d(x, Sn, kind="cubic", fill_value='extrapolate')
@@ -160,7 +159,7 @@ Tnf = sp.interpolate.interp1d(x, Tn, kind="cubic", fill_value='extrapolate')
 #plot critical shear
 plt.figure(figsize=(13, 5))
 plt.subplots_adjust(wspace=0.5)
-plt.suptitle("Shear, Critical Load Cases")
+plt.suptitle("Shear, Critical Load Case")
 
 plt.subplot(121)
 plt.plot(x, Sp)
