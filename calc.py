@@ -96,7 +96,7 @@ plt.ylabel("Angular Dispalcement [deg]")
 
 plt.show()
 
-'''method which uses sp.integrate.quad for the qurious TA'''
+# '''method which uses sp.integrate.quad for the qurious TA'''
 # def dvdy(bending):
 
 #     def result(y):

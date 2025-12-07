@@ -13,38 +13,32 @@ load_cases = [
     #in reality the altitude is not required because the dynamic pressure is computed using V_EAS, but its included anyways.
     (163, 9448, 2.5, True, True),   #0
     (154, 9448, -1.0, True, True),    #1
-    (136, 9448, 2.0, True, True),      #2 
-    (152, 9448, 2.5, True, True),   #3
+    (152, 9448, 2.5, True, True),   #2
 
     # b
-    (193, 0, 2.5, False, True),  #4
-    (154, 0, -1.0, False, True),   #5
-    (107, 0, 2, False, True),   #6
-    (123, 0, 2.5, False, True),   #7
+    (193, 0, 2.5, False, True),  #3
+    (154, 0, -1.0, False, True),   #4
+    (123, 0, 2.5, False, True),   #5
 
     # c
-    (193, 0, 2.5, False, False),   #8
-    (154, 0, -1.0, False, False),   #9
-    (93, 0, 2.0, False, False),    #10
-    (107, 0, 2.5, False, False),   #11
+    (193, 0, 2.5, False, False),   #6
+    (154, 0, -1.0, False, False),   #7
+    (107, 0, 2.5, False, False),   #8
     
     #d
-    (163, 9448, 2.5, False, True),   #12
-    (154, 9448, -1, False, True),   #13
-    (107, 9448, 2, False, True),    #14
-    (123, 9448, 2.5, False, True),    #15
+    (163, 9448, 2.5, False, True),   #9
+    (154, 9448, -1, False, True),   #10
+    (123, 9448, 2.5, False, True),    #11
     
     #e
-    (163, 9448, 2.5, False, False),   #16
-    (154, 9448, -1, False, False),    #17
-    (93, 9448, 2, False, False),   #18
-    (107, 9448, 2.5, False, False),    #19
+    (163, 9448, 2.5, False, False),   #12
+    (154, 9448, -1, False, False),    #13
+    (107, 9448, 2.5, False, False),    #14
 
     #f
-    (193, 0, 2.5, True, True),    #20
-    (154, 0, -1.0, True, True),    #21
-    (136, 0, 2, True, True),   #22
-    (152, 0, 2.5, True, True),    #23
+    (193, 0, 2.5, True, True),    #15
+    (154, 0, -1.0, True, True),    #16
+    (152, 0, 2.5, True, True),    #17
     
 ]
 
@@ -81,7 +75,7 @@ for case in load_cases:
         plt.title("Shear, positive load factor")
         plt.xlabel("Spanwise position y [m]")
         plt.ylabel("Shear force S(y) [N]")
-        plt.gca().invert_yaxis()
+        
 
         plt.subplot(232)
         plt.plot(x, M)
@@ -111,7 +105,6 @@ for case in load_cases:
         plt.title("Shear, negative load factor")
         plt.xlabel("Spanwise position y [m]")
         plt.ylabel("Shear force S(y) [N]")
-        plt.gca().invert_yaxis()
 
         plt.subplot(235)
         plt.plot(x, M)
@@ -126,16 +119,24 @@ for case in load_cases:
         plt.ylabel("Torsion T(y) [Nm]")
 
     count += 1
-    print("Im looping :) ", count,"/23, please wait")
+    print("Im looping :) ", count,"/, please wait")
+
+
+plt.subplot(231)
+plt.gca().invert_yaxis()
+plt.subplot(234)
+plt.gca().invert_yaxis()
 
 plt.show()
 
+print(maxS, maxM, maxT, countS, countM, countT)
+
 #positive loading
-V_easp, altp, npos, fuelp, payloadp = load_cases[countS[0]]
+V_easp, altp, npos, fuelp, payloadp = load_cases[15]
 x, Sp, Mdummy, Tdummy = LD.internalcalculator(V_easp, altp, npos, fuelp, payloadp)
-V_easp, altp, npos, fuelp, payloadp = load_cases[countM[0]]
+V_easp, altp, npos, fuelp, payloadp = load_cases[15]
 x, Sdummy, Mp, Tdummy = LD.internalcalculator(V_easp, altp, npos, fuelp, payloadp)
-V_easp, altp, npos, fuelp, payloadp = load_cases[countT[0]]
+V_easp, altp, npos, fuelp, payloadp = load_cases[2]
 x, Sdummy, Mdummy, Tp = LD.internalcalculator(V_easp, altp, npos, fuelp, payloadp)
 
 Spf = sp.interpolate.interp1d(x, Sp, kind="cubic", fill_value='extrapolate')
@@ -143,59 +144,74 @@ Mpf = sp.interpolate.interp1d(x, Mp, kind="cubic", fill_value='extrapolate')
 Tpf = sp.interpolate.interp1d(x, Tp, kind="cubic", fill_value='extrapolate')
 
 #negative loading
-V_easp, altp, npos, fuelp, payloadp = load_cases[countS[1]]
+V_easp, altp, npos, fuelp, payloadp = load_cases[1]
 x, Sn, Mdummy, Tdummy = LD.internalcalculator(V_easp, altp, npos, fuelp, payloadp)
-V_easp, altp, npos, fuelp, payloadp = load_cases[countM[1]]
+V_easp, altp, npos, fuelp, payloadp = load_cases[1]
 x, Sdummy, Mn, Tdummy = LD.internalcalculator(V_easp, altp, npos, fuelp, payloadp)
-V_easp, altp, npos, fuelp, payloadp = load_cases[countT[1]]
+V_easp, altp, npos, fuelp, payloadp = load_cases[1]
 x, Sdummy, Mdummy, Tn = LD.internalcalculator(V_easp, altp, npos, fuelp, payloadp)
 
 Snf = sp.interpolate.interp1d(x, Sn, kind="cubic", fill_value='extrapolate')
 Mnf = sp.interpolate.interp1d(x, Mn, kind="cubic", fill_value='extrapolate')
 Tnf = sp.interpolate.interp1d(x, Tn, kind="cubic", fill_value='extrapolate')
 
-#plot critical cases
-plt.figure(figsize=(12, 8))
+
+#plot critical shear
+plt.figure(figsize=(13, 5))
 plt.subplots_adjust(wspace=0.5)
-plt.subplots_adjust(hspace=0.5)
-plt.suptitle("Critical Loading Diagrams")
+plt.suptitle("Shear, Critical Load Cases")
 
-plt.subplot(231)
+plt.subplot(121)
 plt.plot(x, Sp)
-plt.title("Shear, positive load factor")
-plt.xlabel("Spanwise position y [m]")
-plt.ylabel("Shear force S(y) [N]")
+plt.title("Positive Load Case")
+plt.xlabel("Span Wise Location [m]")
+plt.ylabel("Shear [N]")
 plt.gca().invert_yaxis()
 
-plt.subplot(232)
-plt.plot(x, Mp)
-plt.title("Bending Moment, positive load factor")
-plt.xlabel("Spanwise position y [m]")
-plt.ylabel("Moment M(y) [Nm]")
-
-plt.subplot(233)
-plt.plot(x, Tp)
-plt.title("Torsion, positive load factor")
-plt.xlabel("Spanwise position y [m]")
-plt.ylabel("Torsion T(y) [Nm]")
-
-plt.subplot(234)
+plt.subplot(122)
 plt.plot(x, Sn)
-plt.title("Shear, negative load factor")
-plt.xlabel("Spanwise position y [m]")
-plt.ylabel("Shear force S(y) [N]")
+plt.title("Negative Load Case")
+plt.xlabel("Span Wise Location [m]")
+plt.ylabel("Shear [N]")
 plt.gca().invert_yaxis()
-
-plt.subplot(235)
-plt.plot(x, Mn)
-plt.title("Bending Moment, negative load factor")
-plt.xlabel("Spanwise position y [m]")
-plt.ylabel("Moment M(y) [Nm]")
-
-plt.subplot(236)
-plt.plot(x, Tn)
-plt.title("Torsion, negative load factor")
-plt.xlabel("Spanwise position y [m]")
-plt.ylabel("Torsion T(y) [Nm]")
 
 plt.show()
+
+#plot critical bending
+plt.figure(figsize=(13, 5))
+plt.subplots_adjust(wspace=0.5)
+plt.suptitle("Bending Moment, Critical Load Cases")
+
+plt.subplot(121)
+plt.plot(x, Mp)
+plt.title("Positive Load Case")
+plt.xlabel("Span Wise Location [m]")
+plt.ylabel("Bending Moment [Nm]")
+
+plt.subplot(122)
+plt.plot(x, Mn)
+plt.title("Negative Load Case")
+plt.xlabel("Span Wise Location [m]")
+plt.ylabel("Bending Moment [Nm]")
+
+plt.show()
+
+#plot critical torsion
+plt.figure(figsize=(13, 5))
+plt.subplots_adjust(wspace=0.5)
+plt.suptitle("Torque, Critical Load Cases")
+
+plt.subplot(121)
+plt.plot(x, Tp)
+plt.title("Positive Load Case")
+plt.xlabel("Span Wise Location [m]")
+plt.ylabel("Torque [Nm]")
+
+plt.subplot(122)
+plt.plot(x, Tn)
+plt.title("Negative Load Case")
+plt.xlabel("Span Wise Location [m]")
+plt.ylabel("Torque [Nm]")
+
+plt.show()
+
