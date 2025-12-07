@@ -1,6 +1,5 @@
 import numpy as np
 import scipy as sp
-import AerodynamicLoads as al
 
 #Finding the structual weight distribution as a function of y
 def weightdistribution2(mass, span, ch, g):

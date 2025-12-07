@@ -42,6 +42,7 @@ load_cases = [
     
 ]
 
+#variables to help find the critical load case
 maxS = [0, 0]
 maxM = [0, 0]
 maxT = [0, 0]
