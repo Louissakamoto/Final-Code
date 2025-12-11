@@ -90,80 +90,109 @@ def WP4_2_wingbox_shape(y):
     return result
     
 def WP4_2_Torsional_Stiffness(y):
-    theta = 0.0497367 # in radians
-    c = 6.53 - (4.62/var.b/2)*y # chord length
-    d = 0.45*c # distance between spars
-    s_f = 0.128*c # length of the front spar
-    s_b = 0.1*c # length of the back spar
-
-    # lengths of each segment
-    l1 = d/cos(theta)
-    l2 = s_b
-    l3 = d/cos(theta)
-    l4 = s_f
 
     if not var.multi:
-        list1=WP4_2_wingbox_shape(y) #finds the properties of the cross section
-        fs=list1[4][1]-list1[1][1] #height of front spar
-        rs=list1[3][1]-list1[2][1] #height of rear spar
-        L_top=sqrt((list1[4][0]-list1[3][0])**2+(list1[4][1]-list1[3][1])**2)
-        L_bottom=sqrt((list1[2][0]-list1[1][0])**2+(list1[2][1]-list1[1][1])**2)
+        theta = 0.0497367 # in radians
+        c = 6.53 - (4.62/var.b/2)*y # chord length
+        d = 0.45*c # distance between spars
+        s_f = 0.128*c # length of the front spar
+        s_b = 0.1*c # length of the back spar
+        t1 = var.t_spar
+        t2 = var.t_skin
+        l2 = s_b
+        l4 = s_f
+        p3 = (d, d*tan(theta)+l2)
+        theta2 = atan((l4 - p3[1])/d)
+        l1 = d/cos(theta)
+        l3 = d/cos(theta2)
 
-        h_trapezoid=list1[2][0]-list1[1][0] 
-
-        A=(fs+rs)*h_trapezoid/2 #Cross sectional area
-
-        integral=(fs+rs)/var.t_spar+(L_top+L_bottom)/var.t_skin #Calculates the integral in the formula for J
-
-        J=4*A**2/integral #Polar moment of inertia
-
-        torsional_stiffness=var.G*J
-        return torsional_stiffness
+        A = (l4 + l2) * d /2
+        I = l4/t1 + l1/t2 + l2/t1 + l3/t2
+        GJ = var.G * 4 * A**2 / I
+        return GJ
     else:
         theta = 0.0497367 # in radians
         c = 6.53 - (4.62/var.b/2)*y # chord length
         d = 0.45*c # distance between spars
         s_f = 0.128*c # length of the front spar
         s_b = 0.1*c # length of the back spar
-        p3 = (d, tan(theta)*d + s_b)
-        theta2 = atan((s_f - p3[1])/d)
-        p5 = (var.spar_location*d, var.spar_location*d*tan(theta))
-        p6 = (var.spar_location, s_f - var.spar_location*d*tan(theta2))
-        l5 = p6[1] - p5[1]
+        f = var.spar_location
 
-        list1=WP4_2_wingbox_shape(y)
-        #determine the areas of the cells
-        h_1 = var.spar_location*d 
-        h_2 = (1-var.spar_location)*d
-        A_1 = (l4+l5)/2*h_1
-        A_2 = (l4+l2)/2*h_2
-
-        #determine constants for multicell torsion
         t1 = var.t_spar
-        t2 = var.spar_location
-        G = var.G
+        t2 = var.t_skin
 
-        s1 = l4
-        s2 = var.spar_location*l1
-        s3 = l5
-        s4 = l3
-        s5 = l1 - s2
-        s6 = l2
-        s7 = l3 - s4
-        
-        k1 = 1/(2*A_1*G)*(s1/t1+s2/t2+s3/t1+s4/t2)
-        k2 = -1/(2*A_1*G)*s3/t1
-        k3 = 1/(2*A_2*G)*(s5/t2+s6/t1+s7/t2+s3/t1)
-        k4 = -1/(2*A_2*G)*s3/t1
+        l2 = s_b
+        l4 = s_f
+        p3 = (d, d*tan(theta)+l2)
 
-        lh_matrix = np.array([[0, 2*A_1,2*A_2],
-                           [-1, k1, k2],
-                           [-1, k4, k3]])
-        rh_matrix = np.array([1, 0, 0])
-        solution = np.linalg.solve(lh_matrix, rh_matrix)
-        torsional_stiffness = 1/solution[0]
-        return torsional_stiffness
-        
+        theta2 = atan((l4 - p3[1])/d)
+
+        p5 = (f*d, f*d*tan(theta))
+        p6 = (f*d, l4 - f*d*tan(theta2))
+
+        l1 = d/cos(theta)
+        l3 = d/cos(theta2)
+
+        s1 = f*l1
+        s2 = (1 - f)*l1
+        s3 = l2
+        s4 = (1 -f)*l3
+        s5 = f*l3
+        s6 = l4
+        s7 = p6[1] - p5[1]
+
+        A1 = (s6 + s7) * f * d/2
+        A2 = (s7 + s3) * (1 -f) * d/2
+
+        c1 = 1/(2*A1*var.G)*(s1/t2+s7/t1+s5/t2+s6/t1)
+        c2 = -1/(2*A1*var.G)*(s7/t1)
+        c3 = -1/(2*A2*var.G)*(s7/t1)
+        c4 = 1/(2*A1*var.G)*(s2/t2+s3/t1+s4/t2+s7/t1)
+
+        LHS = [[0, 2*A1, 2*A2], [-1, c1, c2], [-1, c3, c4]]
+        RHS = [1, 0, 0]
+        sol = np.linalg.solve(LHS, RHS)
+        return 1/sol[0]
+    
+        # p3 = (d, tan(theta)*d + s_b)
+        # theta2 = atan((s_f - p3[1])/d)
+        # p5 = (var.spar_location*d, var.spar_location*d*tan(theta))
+        # p6 = (var.spar_location*d, s_f - var.spar_location*d*tan(theta2))
+        # l5 = p6[1] - p5[1]
+
+        # #determine the areas of the cells
+        # h_1 = var.spar_location*d 
+        # h_2 = (1-var.spar_location)*d
+
+        # #determine constants for multicell torsion
+        # t1 = var.t_spar
+        # t2 = var.t_skin
+
+        # G = var.G
+        # s1 = l4
+        # s2 = var.spar_location*l1 
+        # s3 = l5
+        # s4 = var.spar_location*l3
+        # s5 = l1 - s2
+        # s6 = l2
+        # s7 = l3 - s4
+
+        # A_1 = (s1+s3)*h_1/2
+        # A_2 = (s3+s6)*h_2/2
+
+        # k1 = 1/(2*A_1*G)*(s1/t1+s2/t2+s3/t1+s4/t2)
+        # k2 = -1/(2*A_1*G)*s3/t1
+        # k3 = 1/(2*A_2*G)*(s5/t2+s6/t1+s7/t2+s3/t1)
+        # k4 = -1/(2*A_2*G)*s3/t1
+
+        # lh_matrix = np.array([[0, 2*A_1,2*A_2],
+        #                    [-1, k4, k3],
+        #                    [-1, k1, k2]])
+        # rh_matrix = np.array([1, 0, 0])
+        # solution = np.linalg.solve(lh_matrix, rh_matrix)
+        # torsional_stiffness = 1/solution[0]
+        # return torsional_stiffness
+     
 def WP4_2_Ixx(y):
 
     list1=WP4_2_wingbox_shape(y) 
@@ -217,31 +246,31 @@ def WP4_2_Ixx(y):
     return Ixx
 
 #Create a y_list with step size 0.1
-y_list = np.zeros(224)
-for i in range(len(y_list)):
-    y_list[i] = i/10
+# y_list = np.zeros(224)
+# for i in range(len(y_list)):
+#     y_list[i] = i/10
 
-Ixx_list = np.zeros(224)
-for i in range(len(Ixx_list)):
-    Ixx_list[i] = WP4_2_Ixx(i/10)
+# Ixx_list = np.zeros(224)
+# for i in range(len(Ixx_list)):
+#     Ixx_list[i] = WP4_2_Ixx(i/10)
 
-GJ_list = np.zeros(224)
-for i in range(len(GJ_list)):
-    GJ_list[i] = WP4_2_Torsional_Stiffness(i/10)
+# GJ_list = np.zeros(224)
+# for i in range(len(GJ_list)):
+#     GJ_list[i] = WP4_2_Torsional_Stiffness(i/10)
 
-plt.figure(figsize=(13, 5))
-plt.subplots_adjust(wspace=0.5)
+# plt.figure(figsize=(13, 5))
+# plt.subplots_adjust(wspace=0.5)
 
-plt.subplot(121)
-plt.plot(y_list, Ixx_list)
-plt.title("Moment of Inertia")
-plt.xlabel("Span-Wise location [m]")
-plt.ylabel("Ixx [m^4]")
+# plt.subplot(121)
+# plt.plot(y_list, Ixx_list)
+# plt.title("Moment of Inertia")
+# plt.xlabel("Span-Wise location [m]")
+# plt.ylabel("Ixx [m^4]")
 
-plt.subplot(122)
-plt.plot(y_list, GJ_list)
-plt.title("Torsional Stiffness")
-plt.xlabel("Span-Wise location [m]")
-plt.ylabel("GJ [Nm^2]")
+# plt.subplot(122)
+# plt.plot(y_list, GJ_list)
+# plt.title("Torsional Stiffness")
+# plt.xlabel("Span-Wise location [m]")
+# plt.ylabel("GJ [Nm^2]")
 
-plt.show()
+# plt.show()
